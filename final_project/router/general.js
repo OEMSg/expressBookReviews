@@ -108,30 +108,40 @@ public_users.get('/author/:author', async function (req, res) {
     }
 });
 
-// Get all books based on title
-public_users.get('/title/:title', function (req, res) {
-    // Retrieve the title from the request parameters
+// Task 13: Get book details based on title using async-await and Promises
+public_users.get('/title/:title', async function (req, res) {
     const requestedTitle = req.params.title;
 
-    // Obtain all the keys for the 'books' object
-    const bookKeys = Object.keys(books);
+    try {
+        // Create a promise that searches for books by title
+        const getBooksByTitle = new Promise((resolve, reject) => {
+            const bookKeys = Object.keys(books);
+            let matchingBooks = [];
 
-    // Create an array to hold any matching books
-    let matchingBooks = [];
+            // Iterate through the keys to find matches
+            for (let i = 0; i < bookKeys.length; i++) {
+                const isbn = bookKeys[i];
+                if (books[isbn].title === requestedTitle) {
+                    matchingBooks.push(books[isbn]);
+                }
+            }
 
-    // Iterate through the keys to check the title of each book
-    for (let i = 0; i < bookKeys.length; i++) {
-        const isbn = bookKeys[i];
-        if (books[isbn].title === requestedTitle) {
-            matchingBooks.push(books[isbn]);
-        }
-    }
+            // Resolve if books are found, otherwise reject
+            if (matchingBooks.length > 0) {
+                resolve(matchingBooks);
+            } else {
+                reject(new Error("No books found for the provided title."));
+            }
+        });
 
-    // Send the response
-    if (matchingBooks.length > 0) {
-        return res.status(200).send(JSON.stringify(matchingBooks, null, 4));
-    } else {
-        return res.status(404).json({ message: "No books found for the provided title." });
+        // Wait for the promise to resolve
+        const fetchedBooks = await getBooksByTitle;
+
+        // Send the matching books as a response
+        return res.status(200).send(JSON.stringify(fetchedBooks, null, 4));
+    } catch (error) {
+        // Catch the rejection if no books are found
+        return res.status(404).json({ message: error.message });
     }
 });
 
