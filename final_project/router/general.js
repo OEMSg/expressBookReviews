@@ -27,10 +27,22 @@ public_users.post("/register", (req, res) => {
     return res.status(404).json({ message: "Unable to register user." });
 });
 
-// Get the book list available in the shop
-public_users.get('/', function (req, res) {
-    // Send JSON response with formatted books data
-    return res.status(200).send(JSON.stringify(books, null, 4));
+// Task 10: Get the book list available in the shop using async-await
+public_users.get('/', async function (req, res) {
+    try {
+        // Simulating an asynchronous operation (like fetching from an external API or database)
+        const getBooks = new Promise((resolve, reject) => {
+            resolve(books);
+        });
+
+        // Wait for the promise to resolve
+        const fetchedBooks = await getBooks;
+
+        // Send JSON response with formatted books data
+        return res.status(200).send(JSON.stringify(fetchedBooks, null, 4));
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching books", error: error.message });
+    }
 });
 
 // Get book details based on ISBN
