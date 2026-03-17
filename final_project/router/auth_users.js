@@ -5,7 +5,7 @@ const regd_users = express.Router();
 
 let users = [];
 
-const isValid = (username)=>{ //returns boolean
+const isValid = (username) => { //returns boolean
     // Filter the users array for any user with the same username
     let userswithsamename = users.filter((user) => {
         return user.username === username;
@@ -18,7 +18,7 @@ const isValid = (username)=>{ //returns boolean
     }
 }
 
-const authenticatedUser = (username,password)=>{ //returns boolean
+const authenticatedUser = (username, password) => { //returns boolean
     // Filter the users array for any user with the same username and password
     let validusers = users.filter((user) => {
         return (user.username === username && user.password === password);
@@ -32,7 +32,7 @@ const authenticatedUser = (username,password)=>{ //returns boolean
 }
 
 //only registered users can login
-regd_users.post("/login", (req,res) => {
+regd_users.post("/login", (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
@@ -60,8 +60,28 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    // Retrieve the ISBN from the request parameters
+    const isbn = req.params.isbn;
+
+    // Retrieve the review from the request query
+    const review = req.query.review;
+
+    // Retrieve the username from the session authorization object
+    const username = req.session.authorization.username;
+
+    // Check if the book exists in the database
+    if (books[isbn]) {
+        // Check if a review was actually provided in the query
+        if (review) {
+            // Add or modify the review using the username as the key
+            books[isbn].reviews[username] = review;
+            return res.status(200).json({ message: `The review for the book with ISBN ${isbn} has been added/updated successfully.` });
+        } else {
+            return res.status(400).json({ message: "Please provide a review." });
+        }
+    } else {
+        return res.status(404).json({ message: "Book not found." });
+    }
 });
 
 module.exports.authenticated = regd_users;
